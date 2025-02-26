@@ -1,1 +1,2 @@
-# comp590as4
+### Assignment 4: Erlang processes program
+### Reese Letts and Maria Thomas
