@@ -10,7 +10,7 @@ loop(Serv1) ->
     Msg = read_input(),
     case Msg of
         all_done -> ok;
-        _ ->
+        _ -> 
             Serv1 ! {self(), Msg},
             loop(Serv1)
     end.
@@ -22,25 +22,25 @@ read_input() ->
 serv1(Serv2) ->
     Serv2_Pid = spawn(?MODULE, serv2, [self()]),
     receive
-        {From, {add, A, B}} ->
+        {_, {add, A, B}} ->
             io:format("(serv1) ~p + ~p = ~p~n", [A, B, A + B]),
             serv1(Serv2_Pid);
-        {From, {sub, A, B}} ->
+        {_, {sub, A, B}} ->
             io:format("(serv1) ~p - ~p = ~p~n", [A, B, A - B]),
             serv1(Serv2_Pid);
-        {From, {mult, A, B}} ->
+        {_, {mult, A, B}} ->
             io:format("(serv1) ~p * ~p = ~p~n", [A, B, A * B]),
             serv1(Serv2_Pid);
-        {From, {div, A, B}} when B =/= 0 ->
+        {_, {div, A, B}} when B =/= 0 ->
             io:format("(serv1) ~p / ~p = ~p~n", [A, B, A / B]),
             serv1(Serv2_Pid);
-        {From, {neg, A}} ->
+        {_, {neg, A}} ->
             io:format("(serv1) -~p = ~p~n", [A, -A]),
             serv1(Serv2_Pid);
-        {From, {sqrt, A}} when A >= 0 ->
+        {_, {sqrt, A}} when A >= 0 ->
             io:format("(serv1) sqrt(~p) = ~p~n", [A, math:sqrt(A)]),
             serv1(Serv2_Pid);
-        {From, halt} ->
+        {_, halt} ->
             Serv2_Pid ! {self(), halt},
             io:format("(serv1) Halting...~n");
         Msg ->
@@ -51,15 +51,15 @@ serv1(Serv2) ->
 serv2(Serv3) ->
     Serv3_Pid = spawn(?MODULE, serv3, [0]),
     receive
-        {From, [H | T]} when is_integer(H) ->
+        {_, [H | T]} when is_integer(H) ->
             Sum = lists:sum([X || X <- [H | T], is_number(X)]),
             io:format("(serv2) Sum = ~p~n", [Sum]),
             serv2(Serv3_Pid);
-        {From, [H | T]} when is_float(H) ->
+        {_, [H | T]} when is_float(H) ->
             Prod = lists:foldl(fun(X, Acc) when is_number(X) -> X * Acc; (_, Acc) -> Acc end, 1, [H | T]),
             io:format("(serv2) Product = ~p~n", [Prod]),
             serv2(Serv3_Pid);
-        {From, halt} ->
+        {_, halt} ->
             Serv3_Pid ! {self(), halt},
             io:format("(serv2) Halting...~n");
         Msg ->
@@ -69,10 +69,10 @@ serv2(Serv3) ->
 
 serv3(Count) ->
     receive
-        {From, {error, Msg}} ->
+        {_, {error, Msg}} ->
             io:format("(serv3) Error: ~p~n", [Msg]),
             serv3(Count);
-        {From, halt} ->
+        {_, halt} ->
             io:format("(serv3) Halting... Total unprocessed messages: ~p~n", [Count]);
         Msg ->
             io:format("(serv3) Not handled: ~p~n", [Msg]),
