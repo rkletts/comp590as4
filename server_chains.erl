@@ -1,4 +1,4 @@
--module(chain_server).
+-module(server_chains).
 -export([start/0]).
 
 % Team members: [Reese Letts and Maria Thomas]
